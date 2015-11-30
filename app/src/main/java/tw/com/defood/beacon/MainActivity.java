@@ -1,132 +1,176 @@
 package tw.com.defood.beacon;
 
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothManager;
-import android.content.Context;
-import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
+import android.Manifest;
+import android.annotation.TargetApi;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
+import android.os.RemoteException;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity {
-    private BluetoothAdapter mBluetoothAdapter;
-    private TextView mBeacon;
+import org.altbeacon.beacon.Beacon;
+import org.altbeacon.beacon.BeaconConsumer;
+import org.altbeacon.beacon.BeaconManager;
+import org.altbeacon.beacon.RangeNotifier;
+import org.altbeacon.beacon.Region;
+
+import java.util.Collection;
+
+import hugo.weaving.DebugLog;
+
+public class MainActivity extends AppCompatActivity implements BeaconConsumer {
+    private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
+    private BeaconManager beaconManager = BeaconManager.getInstanceForApplication(this);
+
+    //private TextView mBeacon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        verifyBluetooth();
+        verifyLocation();
 
-        mBeacon = (TextView) findViewById(R.id.beacon);
-
-        BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        mBluetoothAdapter = bluetoothManager.getAdapter();
-        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
-            Intent enableBluetooth = new Intent(
-                    BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBluetooth, 1);
-        }
-        mBluetoothAdapter.startLeScan(mLeScanCallback);
-
+        beaconManager.bind(this);
     }
 
-    private BluetoothAdapter.LeScanCallback mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
-        @Override
-        public void onLeScan(final BluetoothDevice device, final int rssi,
-                             final byte[] scanRecord) {
-            int startByte = 2;
-            boolean patternFound = false;
-            // 寻找ibeacon
-            while (startByte <= 5) {
-                if (((int) scanRecord[startByte + 2] & 0xff) == 0x02 && // Identifies
-                        // an
-                        // iBeacon
-                        ((int) scanRecord[startByte + 3] & 0xff) == 0x15) { // Identifies
-                    // correct
-                    // data
-                    // length
-                    patternFound = true;
-                    break;
-                }
-                startByte++;
-            }
-            // 如果找到了的话
-            if (patternFound) {
-                // 转换为16进制
-                byte[] uuidBytes = new byte[16];
-                System.arraycopy(scanRecord, startByte + 4, uuidBytes, 0, 16);
-                String hexString = bytesToHex(uuidBytes);
+    private void verifyBluetooth() {
 
-                // ibeacon的UUID值
-                final String uuid = hexString.substring(0, 8) + "-"
-                        + hexString.substring(8, 12) + "-"
-                        + hexString.substring(12, 16) + "-"
-                        + hexString.substring(16, 20) + "-"
-                        + hexString.substring(20, 32);
-
-                // ibeacon的Major值
-                final int major = (scanRecord[startByte + 20] & 0xff) * 0x100
-                        + (scanRecord[startByte + 21] & 0xff);
-
-                // ibeacon的Minor值
-                final int minor = (scanRecord[startByte + 22] & 0xff) * 0x100
-                        + (scanRecord[startByte + 23] & 0xff);
-
-                final String ibeaconName = device.getName();
-                final String mac = device.getAddress();
-                final int txPower = (scanRecord[startByte + 24]);
-
-
-                runOnUiThread(new Runnable() {
+        try {
+            if (!BeaconManager.getInstanceForApplication(this).checkAvailability()) {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Bluetooth not enabled");
+                builder.setMessage("Please enable bluetooth in settings and restart this application.");
+                builder.setPositiveButton(android.R.string.ok, null);
+                builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
                     @Override
-                    public void run() {
-                        String s = "";
-                        s = s + "BLE:" + bytesToHex(scanRecord);
-                        s = s + "\nBLE:" + "Name：" + ibeaconName + "\nMac：" + mac
-                                + " \nUUID：" + uuid + "\nMajor：" + major + "\nMinor："
-                                + minor + "\nTxPower：" + txPower + "\nrssi：" + rssi;
-                        s = s + "\nBLE:" + "distance：" + calculateAccuracy(txPower, rssi);
-                        mBeacon.setText(s);
+                    public void onDismiss(DialogInterface dialog) {
+                        finish();
+                        System.exit(0);
                     }
                 });
+                builder.show();
+            }
+        } catch (RuntimeException e) {
+            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Bluetooth LE not available");
+            builder.setMessage("Sorry, this device does not support Bluetooth LE.");
+            builder.setPositiveButton(android.R.string.ok, null);
+            builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
 
+                @Override
+                public void onDismiss(DialogInterface dialog) {
+                    finish();
+                    System.exit(0);
+                }
 
+            });
+            builder.show();
 
-                Log.d("BLE", bytesToHex(scanRecord));
-                Log.d("BLE", "Name：" + ibeaconName + "\nMac：" + mac
-                        + " \nUUID：" + uuid + "\nMajor：" + major + "\nMinor："
-                        + minor + "\nTxPower：" + txPower + "\nrssi：" + rssi);
-                Log.d("BLE", "distance：" + calculateAccuracy(txPower, rssi));
+        }
 
+    }
+
+    private void verifyLocation() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            // Android M Permission check
+            if (this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("This app needs location access");
+                builder.setMessage("Please grant location access so this app can detect beacons in the background.");
+                builder.setPositiveButton(android.R.string.ok, null);
+                builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+
+                    @TargetApi(23)
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                                PERMISSION_REQUEST_COARSE_LOCATION);
+                    }
+
+                });
+                builder.show();
             }
         }
-    };
 
-    static final char[] hexArray = "0123456789ABCDEF".toCharArray();
-
-    private static String bytesToHex(byte[] bytes) {
-        char[] hexChars = new char[bytes.length * 2];
-        for (int j = 0; j < bytes.length; j++) {
-            int v = bytes[j] & 0xFF;
-            hexChars[j * 2] = hexArray[v >>> 4];
-            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
-        }
-        return new String(hexChars);
     }
 
-    protected static double calculateAccuracy(int txPower, double rssi) {
-        if (rssi == 0) {
-            return -1.0; // if we cannot determine accuracy, return -1.
-        }
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_COARSE_LOCATION: {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    //Log.d(TAG, "coarse location permission granted");
+                } else {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle("Functionality limited");
+                    builder.setMessage("Since location access has not been granted, this app will not be able to discover beacons when in the background.");
+                    builder.setPositiveButton(android.R.string.ok, null);
+                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
 
-        double ratio = rssi * 1.0 / txPower;
-        if (ratio < 1.0) {
-            return Math.pow(ratio, 10);
-        } else {
-            double accuracy = (0.89976) * Math.pow(ratio, 7.7095) + 0.111;
-            return accuracy;
+                        @Override
+                        public void onDismiss(DialogInterface dialog) {
+                        }
+
+                    });
+                    builder.show();
+                }
+                return;
+            }
         }
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        beaconManager.unbind(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (beaconManager.isBound(this)) beaconManager.setBackgroundMode(true);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (beaconManager.isBound(this)) beaconManager.setBackgroundMode(false);
+    }
+
+    @Override
+    public void onBeaconServiceConnect() {
+        beaconManager.setRangeNotifier(new RangeNotifier() {
+            @DebugLog
+            @Override
+            public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
+                if (beacons.size() > 0) {
+                    //EditText editText = (EditText)RangingActivity.this.findViewById(R.id.rangingText);
+                    Beacon firstBeacon = beacons.iterator().next();
+                    logToDisplay("The first beacon " + firstBeacon.toString() + " is about " + firstBeacon.getDistance() + " meters away.");
+                }
+            }
+
+        });
+
+        try {
+            beaconManager.startRangingBeaconsInRegion(new Region("myRangingUniqueId", null, null, null));
+        } catch (RemoteException e) {
+        }
+
+    }
+
+    private void logToDisplay(final String line) {
+        runOnUiThread(new Runnable() {
+            public void run() {
+                TextView beacon = (TextView) MainActivity.this.findViewById(R.id.beacon);
+                beacon.setText(line);
+            }
+        });
+    }
+
 }

@@ -8,6 +8,17 @@ import android.content.Intent;
 import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
 
+import com.parse.DeleteCallback;
+import com.parse.FindCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+import com.parse.SaveCallback;
+
+import java.util.List;
+
+import hugo.weaving.DebugLog;
+
 public class Helper {
 
     public static void sendNotification(Context context, String text, Intent intent, int id) {
@@ -33,4 +44,71 @@ public class Helper {
         notificationManager.notify(id, builder.build());
     }
 
+    public static boolean isSuccess(ParseException e) {
+        if (e == null) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static void loadDataFromServer() {
+        ParseQuery<BeaconInfo> query = BeaconInfo.getQuery();
+        query.findInBackground(new FindCallback<BeaconInfo>() {
+
+            @DebugLog
+            @Override
+            public void done(List<BeaconInfo> beacons, ParseException parseException) {
+                if (isSuccess(parseException)) {
+                    pinBeacons(beacons);
+                    //Helper.cacheBeacons(beacons);
+                    //EventBus.getDefault().post(favorites);
+                } else {
+                    //EventBus.getDefault().post(parseException);
+                }
+            }
+        });
+    }
+
+    @DebugLog
+    public static void pinBeacons(List<BeaconInfo> beacons) {
+        ParseObject.unpinAllInBackground(beacons, new DeleteCallback() {
+            @Override
+            public void done(ParseException parseException) {
+                if (isSuccess(parseException)) {
+
+                } else {
+                    //EventBus.getDefault().post(parseException);
+                }
+            }
+        });
+
+        ParseObject.pinAllInBackground(beacons, new SaveCallback() {
+            @Override
+            public void done(ParseException parseException) {
+                if (isSuccess(parseException)) {
+
+                } else {
+                    //EventBus.getDefault().post(parseException);
+                }
+            }
+        });
+    }
+
+
+    public static BeaconInfo getUrlWithMajorMinor(String major, String minor, String type) {
+        ParseQuery<BeaconInfo> query = BeaconInfo.getQuery();
+
+        query.whereEqualTo("major", major);
+        query.whereEqualTo("minor", minor);
+        query.whereEqualTo("type", type);
+
+        try {
+            BeaconInfo beaconInfo = query.getFirst();
+            return  beaconInfo;
+        } catch (ParseException e) {
+            return null;
+        }
+
+    }
 }

@@ -20,16 +20,12 @@ import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 
 import java.util.Collection;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import hugo.weaving.DebugLog;
 
 public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
     private BeaconManager beaconManager = BeaconManager.getInstanceForApplication(this);
-    private boolean mIsYoutubeOpen = true;
-    private boolean mIsWebsiteOpen = true;
 
     //private TextView mBeacon;
 
@@ -37,6 +33,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Helper.loadDataFromServer();
+
         verifyBluetooth();
         verifyLocation();
 
@@ -159,31 +157,15 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                     Beacon firstBeacon = beacons.iterator().next();
                     logToDisplay("The first beacon " + firstBeacon.toString() + " is about " + firstBeacon.getDistance() + " meters away.");
 
+                    String major = firstBeacon.getId2().toString();
+                    String minor = firstBeacon.getId3().toString();
+
+
                     if (firstBeacon.getDistance() <= 2) {
-                        if (mIsYoutubeOpen) {
+                        openVideoFromLocal(major, minor);
 
-                            String videoId = "fr7ec406yxQ";
-                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + videoId));
-                            intent.putExtra("VIDEO_ID", videoId);
-                            //startActivityForResult(intent, 0);
-
-                            //startActivityForResult(new Intent(Intent.ACTION_VIEW, Uri.parse("https://youtu.be/fr7ec406yxQ")), 0);
-                            mIsYoutubeOpen = false;
-
-                            Helper.sendNotification(getApplicationContext(), "開啟導灠影片", intent, 2);
-                        }
-                    } else if (firstBeacon.getDistance() > 2 &&firstBeacon.getDistance() < 5) {
-
-                        if (mIsWebsiteOpen) {
-                            String url = "http://museum.de-food.com.tw/tw/index.asp?au_id=29&sub_id=62&prod_sub_id=3";
-                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                            // startActivityForResult(intent, 1);
-
-                            mIsWebsiteOpen = false;
-
-                            Helper.sendNotification(getApplicationContext(), "開啟導灠網站", intent, 3);
-                        }
-
+                    } else if (firstBeacon.getDistance() > 2 && firstBeacon.getDistance() < 5) {
+                        openWebsiteFromLocal(major, minor);
                     }
                 }
             }
@@ -197,19 +179,36 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
 
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    @DebugLog
+    private void openVideoFromLocal(String major, String minor) {
 
-//        switch (requestCode) {
-//            case 0:
-//                mIsYoutubeOpen = true;
-//                break;
-//            case 1:
-//                mIsWebsiteOpen = true;
-//                break;
-//        }
+        BeaconInfo beaconInfo = Helper.getUrlWithMajorMinor(major, minor, "video");
 
+        if (beaconInfo != null && beaconInfo.getIsYoutubeOpen()) {
+            beaconInfo.setIsYoutubeOpen(false);
+
+            String videoId = beaconInfo.getUrl().replace("https://www.youtube.com/watch?v=", "");
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + videoId));
+            intent.putExtra("VIDEO_ID", videoId);
+
+            String id = major + minor + "2";
+            Helper.sendNotification(getApplicationContext(), beaconInfo.getName() + " (" + major + "," + minor + ")" + "開啟導灠影片", intent, Integer.parseInt(id));
+        }
+    }
+
+    @DebugLog
+    private void openWebsiteFromLocal(String major, String minor) {
+        BeaconInfo beaconInfo = Helper.getUrlWithMajorMinor(major, minor, "website");
+
+        if (beaconInfo != null && beaconInfo.getIsWebsiteOpen()) {
+            beaconInfo.setIsWebsiteOpen(false);
+
+            String url = beaconInfo.getUrl();
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+
+            String id = major + minor + "3";
+            Helper.sendNotification(getApplicationContext(), beaconInfo.getName() + "(" + major + "," + minor + ")" + "開啟購物網站", intent, Integer.parseInt(id));
+        }
     }
 
     private void logToDisplay(final String line) {

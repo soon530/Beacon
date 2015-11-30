@@ -1,12 +1,7 @@
 package tw.com.defood.beacon;
 
 import android.app.Application;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
-import android.content.Context;
 import android.content.Intent;
-import android.support.v4.app.NotificationCompat;
 
 import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.BeaconParser;
@@ -40,7 +35,7 @@ public class Myapp extends Application implements BootstrapNotifier {
     @DebugLog
     @Override
     public void didEnterRegion(Region region) {
-        sendNotification();
+        Helper.sendNotification(this, "觀迎來到滷味博物館，已將Beacon功能開啟。", new Intent(this, MainActivity.class), 1);
     }
 
     @DebugLog
@@ -55,24 +50,5 @@ public class Myapp extends Application implements BootstrapNotifier {
 
     }
 
-    private void sendNotification() {
-        NotificationCompat.Builder builder =
-                new NotificationCompat.Builder(this)
-                        .setContentTitle("Beacon Reference Application")
-                        .setContentText("An beacon is nearby.")
-                        .setSmallIcon(R.mipmap.ic_launcher);
-
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addNextIntent(new Intent(this, MainActivity.class));
-        PendingIntent resultPendingIntent =
-                stackBuilder.getPendingIntent(
-                        0,
-                        PendingIntent.FLAG_UPDATE_CURRENT
-                );
-        builder.setContentIntent(resultPendingIntent);
-        NotificationManager notificationManager =
-                (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(1, builder.build());
-    }
 
 }

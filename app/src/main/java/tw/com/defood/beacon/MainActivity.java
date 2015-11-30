@@ -155,7 +155,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                 if (beacons.size() > 0) {
                     //EditText editText = (EditText)RangingActivity.this.findViewById(R.id.rangingText);
                     Beacon firstBeacon = beacons.iterator().next();
-                    logToDisplay("The first beacon " + firstBeacon.toString() + " is about " + firstBeacon.getDistance() + " meters away.");
+                    logToDisplay("The beacon " + firstBeacon.toString() + " is about " + firstBeacon.getDistance() + " meters away. ("+firstBeacon.getRssi()+")", firstBeacon.getId3().toInt() );
 
                     String major = firstBeacon.getId2().toString();
                     String minor = firstBeacon.getId3().toString();
@@ -192,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
             intent.putExtra("VIDEO_ID", videoId);
 
             String id = major + minor + "2";
-            Helper.sendNotification(getApplicationContext(), beaconInfo.getName() + " (" + major + "," + minor + ")" + "開啟導灠影片", intent, Integer.parseInt(id));
+            Helper.sendNotification(getApplicationContext(), beaconInfo.getName() + " (" + major + "," + minor + ") " + "開啟導灠影片", intent, Integer.parseInt(id));
         }
     }
 
@@ -207,15 +207,26 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
 
             String id = major + minor + "3";
-            Helper.sendNotification(getApplicationContext(), beaconInfo.getName() + "(" + major + "," + minor + ")" + "開啟購物網站", intent, Integer.parseInt(id));
+            Helper.sendNotification(getApplicationContext(), beaconInfo.getName() + " (" + major + "," + minor + ") " + "開啟購物網站", intent, Integer.parseInt(id));
         }
     }
 
-    private void logToDisplay(final String line) {
+    private void logToDisplay(final String line, final int id) {
         runOnUiThread(new Runnable() {
             public void run() {
-                TextView beacon = (TextView) MainActivity.this.findViewById(R.id.beacon);
-                beacon.setText(line);
+                switch (id) {
+                    case 9:
+                        TextView b1 = (TextView) MainActivity.this.findViewById(R.id.b1);
+                        b1.setText(line);
+                        break;
+
+                    case 0:
+                        TextView b2 = (TextView) MainActivity.this.findViewById(R.id.b2);
+                        b2.setText(line);
+                        break;
+
+                }
+
             }
         });
     }

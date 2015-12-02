@@ -21,6 +21,8 @@ import hugo.weaving.DebugLog;
 
 public class Helper {
 
+    private static BeaconInfo mBeaconInfo;
+
     public static void sendNotification(Context context, String text, Intent intent, int id) {
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(context)
@@ -110,5 +112,13 @@ public class Helper {
             return null;
         }
 
+    }
+
+    public static void cacheBeaconInfo(BeaconInfo beaconInfo) {
+        mBeaconInfo = beaconInfo;
+    }
+
+    public static BeaconInfo getBeaconInfoFromCache() {
+        return mBeaconInfo;
     }
 }

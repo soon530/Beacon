@@ -13,6 +13,7 @@ import android.os.RemoteException;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import org.altbeacon.beacon.Beacon;
@@ -28,6 +29,8 @@ import hugo.weaving.DebugLog;
 public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
     private BeaconManager beaconManager = BeaconManager.getInstanceForApplication(this);
+    private ListView mListView;
+    private BeaconParseQueryAdapter mAdapter;
 
     //private TextView mBeacon;
 
@@ -35,12 +38,22 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Helper.loadDataFromServer();
+        //Helper.loadDataFromServer();
 
         verifyBluetooth();
         verifyLocation();
 
         beaconManager.bind(this);
+
+        mListView = (ListView) findViewById(R.id.list);
+        mAdapter = new BeaconParseQueryAdapter(getApplicationContext(), new BeaconParseQueryAdapter.ListClickHandler() {
+            @Override
+            public void onDetailClick(BeaconInfo beaconInfo) {
+                Helper.cacheBeaconInfo(beaconInfo);
+                startActivity(new Intent(getApplicationContext(), DetailActivity.class));
+            }
+        });
+        mListView.setAdapter(mAdapter);
     }
 
     private void verifyBluetooth() {
@@ -157,7 +170,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                 if (beacons.size() > 0) {
                     //EditText editText = (EditText)RangingActivity.this.findViewById(R.id.rangingText);
                     Beacon firstBeacon = beacons.iterator().next();
-                    logToDisplay("The beacon " + firstBeacon.toString() + " is about " + firstBeacon.getDistance() + " meters away. ("+firstBeacon.getRssi()+")", firstBeacon.getId3().toInt() );
+                    //logToDisplay("The beacon " + firstBeacon.toString() + " is about " + firstBeacon.getDistance() + " meters away. ("+firstBeacon.getRssi()+")", firstBeacon.getId3().toInt() );
 
                     String major = firstBeacon.getId2().toString();
                     String minor = firstBeacon.getId3().toString();
@@ -213,25 +226,25 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         }
     }
 
-    private void logToDisplay(final String line, final int id) {
-        runOnUiThread(new Runnable() {
-            public void run() {
-                switch (id) {
-                    case 9:
-                        TextView b1 = (TextView) MainActivity.this.findViewById(R.id.b1);
-                        b1.setText(line);
-                        break;
-
-                    case 0:
-                        TextView b2 = (TextView) MainActivity.this.findViewById(R.id.b2);
-                        b2.setText(line);
-                        break;
-
-                }
-
-            }
-        });
-    }
+//    private void logToDisplay(final String line, final int id) {
+//        runOnUiThread(new Runnable() {
+//            public void run() {
+//                switch (id) {
+//                    case 9:
+//                        TextView b1 = (TextView) MainActivity.this.findViewById(R.id.b1);
+//                        b1.setText(line);
+//                        break;
+//
+//                    case 0:
+//                        TextView b2 = (TextView) MainActivity.this.findViewById(R.id.b2);
+//                        b2.setText(line);
+//                        break;
+//
+//                }
+//
+//            }
+//        });
+//    }
 
         @Override
     public boolean onCreateOptionsMenu(Menu menu) {

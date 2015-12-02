@@ -247,7 +247,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
 
         if (id == R.id.action_settings) {
             Intent intent = new Intent();
-            intent.setClass(this, DetailActivity.class);
+            intent.setClass(this, SettingActivity.class);
             startActivity(intent);
         }
 

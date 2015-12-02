@@ -27,6 +27,16 @@ public class BeaconInfo extends ParseObject {
         put("name", value);
     }
 
+    public String getUuid() {
+        String value = getString("uuid");
+        return value;
+    }
+
+    public void setUuid(String value) {
+        put("uuid", value);
+    }
+
+
     public String getMajor() {
         String value = getString("major");
         return value;
@@ -43,6 +53,15 @@ public class BeaconInfo extends ParseObject {
 
     public void setMinor(String value) {
         put("minor", value);
+    }
+
+    public String getTitle() {
+        String value = getString("title");
+        return value;
+    }
+
+    public void setTitle(String value) {
+        put("title", value);
     }
 
     public String getType() {

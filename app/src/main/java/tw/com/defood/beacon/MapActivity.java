@@ -1,6 +1,7 @@
 package tw.com.defood.beacon;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -16,6 +17,7 @@ import android.widget.TableRow;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 public class MapActivity extends AppCompatActivity {
 
@@ -113,7 +115,6 @@ public class MapActivity extends AppCompatActivity {
         private final LayoutInflater inflater;
         private int mDx;
         private int mDy;
-        private FrameLayout mLayout;
 
         public ImageAdapter(Context context) {
             inflater = LayoutInflater.from(context);
@@ -152,7 +153,6 @@ public class MapActivity extends AppCompatActivity {
         public Object instantiateItem(ViewGroup view, final int position) {
             View root = inflater.inflate(R.layout.item_pager_image, view, false);
             assert root != null;
-            mLayout = (FrameLayout) root.findViewById(R.id.layout);
             final FrameLayout mMap = (FrameLayout) root.findViewById(R.id.map);
             mMap.setBackgroundResource(IMAGE_URLS[position]);
 
@@ -207,6 +207,10 @@ public class MapActivity extends AppCompatActivity {
                     public void onClick(View v) {
                         BeaconPosition beaconPosition = (BeaconPosition) v.getTag();
                         Toast.makeText(MapActivity.this, "(x " + beaconPosition.x + ", y " + beaconPosition.y + ") ", Toast.LENGTH_SHORT).show();
+
+                        Intent intent = new Intent();
+                        intent.setClass(MapActivity.this, InfoActivity.class);
+                        startActivity(intent);
                     }
                 });
 

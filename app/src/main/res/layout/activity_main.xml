@@ -5,6 +5,18 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context="tw.com.defood.beacon.MainActivity">
+    <TextView
+        android:id="@+id/b1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Hello World!" />
+
+    <TextView
+        android:id="@+id/b2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="Hello World!" />
 
     <ListView
         android:id="@+id/list"

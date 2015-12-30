@@ -25,6 +25,7 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'org.altbeacon:android-beacon-library:2.7@aar'
+    compile 'de.greenrobot:eventbus:2.4.0'
 
     // Parse
     compile files('libs/Parse-1.8.0.jar')

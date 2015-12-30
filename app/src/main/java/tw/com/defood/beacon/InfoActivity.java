@@ -39,6 +39,8 @@ public class InfoActivity extends YouTubeBaseActivity implements YouTubePlayer.O
     private ImageView mFar;
     private TextView mVideoContent;
     private LinearLayout mVideoContentLayout;
+    private LinearLayout mCouponDivider;
+    private ImageView mCouponImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -169,9 +171,16 @@ public class InfoActivity extends YouTubeBaseActivity implements YouTubePlayer.O
             }
         });
 
+        mCouponDivider = (LinearLayout) findViewById(R.id.coupon_divider);
+        mCouponImage = (ImageView) findViewById(R.id.coupon_image);
 
-
-
+        if (mCoupon == null ) {
+            mCouponDivider.setVisibility(View.GONE);
+            mCouponImage.setVisibility(View.GONE);
+        } else {
+            int resId = getResources().getIdentifier(mCoupon.getImagePath(), "drawable", getPackageName());
+            mCouponImage.setImageResource(resId);
+        }
 
     }
 

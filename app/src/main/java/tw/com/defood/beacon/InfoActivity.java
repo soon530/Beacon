@@ -21,6 +21,8 @@ import com.google.android.youtube.player.YouTubePlayerView;
 import com.parse.ParseException;
 import com.parse.ParseQuery;
 
+import org.w3c.dom.Text;
+
 import java.lang.annotation.Target;
 import java.util.List;
 
@@ -41,6 +43,10 @@ public class InfoActivity extends YouTubeBaseActivity implements YouTubePlayer.O
     private LinearLayout mVideoContentLayout;
     private LinearLayout mCouponDivider;
     private ImageView mCouponImage;
+    private ImageView mProductImage;
+    private TextView mProductTitle;
+    private TextView mProductContent;
+    private LinearLayout mProductLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,16 +98,9 @@ public class InfoActivity extends YouTubeBaseActivity implements YouTubePlayer.O
         // Initializing video player with developer key
         youTubeView.initialize("AIzaSyAhq1fQGZDJ1B9w3MjaRZiS6aWVebzKDSs", this);
 
-        mVideoContentLayout = (LinearLayout) findViewById(R.id.video_content_layout);
 
         mVideoContent = (TextView) findViewById(R.id.video_content);
         mVideoContent.setText(mVideo.getContent());
-
-        if (mVideo.getImagePath() == null) {
-            youTubeView.setVisibility(View.GONE);
-            mVideoContentLayout.setVisibility(View.GONE);
-        }
-
 
         mMap = (ImageView) findViewById(R.id.map);
         mMap.setOnClickListener(new View.OnClickListener() {
@@ -117,6 +116,12 @@ public class InfoActivity extends YouTubeBaseActivity implements YouTubePlayer.O
             case 1:
                 mMap.setImageResource(R.drawable.btn_2f);
                 break;
+        }
+
+        if (mVideo.getImagePath() == null) {
+            youTubeView.setVisibility(View.GONE);
+            mVideoContent.setText("");
+            //mVideoContent.setVisibility(View.GONE);
         }
 
         mNear = (ImageView) findViewById(R.id.near);
@@ -138,16 +143,16 @@ public class InfoActivity extends YouTubeBaseActivity implements YouTubePlayer.O
                 ParseQuery<BeaconPosition> queryPosition = BeaconPosition.getQuery();
                 queryPosition.fromLocalDatastore();
                 queryPosition.whereEqualTo("name", finalNearName);
-                BeaconPosition beaconPositions = null;
+                BeaconPosition beaconPosition = null;
                 try {
-                     beaconPositions = queryPosition.getFirst();
+                     beaconPosition = queryPosition.getFirst();
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
 
                 if (beaconPosition == null ) return;
 
-                Helper.cacheBeaconPosition(beaconPositions);
+                Helper.cacheBeaconPosition(beaconPosition);
                 Intent intent = new Intent();
                 intent.setClass(InfoActivity.this, InfoActivity.class);
                 startActivity(intent);
@@ -180,6 +185,23 @@ public class InfoActivity extends YouTubeBaseActivity implements YouTubePlayer.O
         } else {
             int resId = getResources().getIdentifier(mCoupon.getImagePath(), "drawable", getPackageName());
             mCouponImage.setImageResource(resId);
+        }
+
+        mProductLayout = (LinearLayout) findViewById(R.id.product_layout);
+        mProductImage = (ImageView) findViewById(R.id.product_image);
+        mProductTitle = (TextView) findViewById(R.id.product_title);
+        mProductContent = (TextView) findViewById(R.id.product_content);
+
+        if (mProduct == null) {
+            mProductLayout.setVisibility(View.GONE);
+            mProductImage.setVisibility(View.GONE);
+            mProductTitle.setVisibility(View.GONE);
+            mProductContent.setVisibility(View.GONE);
+        } else {
+            int resId = getResources().getIdentifier(mProduct.getImagePath(), "drawable", getPackageName());
+            mProductImage.setImageResource(resId);
+            mProductTitle.setText(mProduct.getTitle());
+            mProductContent.setText(mProduct.getContent());
         }
 
     }

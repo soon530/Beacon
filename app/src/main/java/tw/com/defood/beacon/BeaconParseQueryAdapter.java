@@ -32,6 +32,10 @@ public class BeaconParseQueryAdapter extends ParseQueryAdapter<BeaconInfo> {
             public ParseQuery<BeaconInfo> create() {
                 ParseQuery<BeaconInfo> query = BeaconInfo.getQuery();
                 query.fromLocalDatastore();
+                query.whereExists("mIsSendNotificatioin");
+                //query.whereExists("mIsSendNotificatioin");
+                query.orderByDescending("mIsSendNotificatioin");
+                //query.addAscendingOrder("mIsSendNotificatioin");
                 return query;
             }
         };
@@ -61,7 +65,7 @@ public class BeaconParseQueryAdapter extends ParseQueryAdapter<BeaconInfo> {
 
 
         mContent = (TextView) rootView.findViewById(R.id.content);
-        mContent.setText(beaconInfo.getName() + "\n" + beaconInfo.getTitle());
+        //mContent.setText(beaconInfo.getName() + "\n" + beaconInfo.getTitle() + "\n" + beaconInfo.getIsSendNotificatioin());
         mContent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

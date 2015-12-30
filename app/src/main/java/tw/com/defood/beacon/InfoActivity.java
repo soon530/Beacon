@@ -10,6 +10,7 @@ import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,6 +37,8 @@ public class InfoActivity extends YouTubeBaseActivity implements YouTubePlayer.O
     private YouTubePlayer mYoutubePlayer;
     private ImageView mNear;
     private ImageView mFar;
+    private TextView mVideoContent;
+    private LinearLayout mVideoContentLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,8 +75,6 @@ public class InfoActivity extends YouTubeBaseActivity implements YouTubePlayer.O
             e.printStackTrace();
         }
 
-
-        youTubeView = (YouTubePlayerView) findViewById(R.id.youtube_view);
         TextView title = (TextView) findViewById(R.id.title);
         title.setText(beaconPosition.getTitle());
 
@@ -84,6 +85,21 @@ public class InfoActivity extends YouTubeBaseActivity implements YouTubePlayer.O
                 finish();
             }
         });
+
+        youTubeView = (YouTubePlayerView) findViewById(R.id.youtube_view);
+        // Initializing video player with developer key
+        youTubeView.initialize("AIzaSyAhq1fQGZDJ1B9w3MjaRZiS6aWVebzKDSs", this);
+
+        mVideoContentLayout = (LinearLayout) findViewById(R.id.video_content_layout);
+
+        mVideoContent = (TextView) findViewById(R.id.video_content);
+        mVideoContent.setText(mVideo.getContent());
+
+        if (mVideo.getImagePath() == null) {
+            youTubeView.setVisibility(View.GONE);
+            mVideoContentLayout.setVisibility(View.GONE);
+        }
+
 
         mMap = (ImageView) findViewById(R.id.map);
         mMap.setOnClickListener(new View.OnClickListener() {
@@ -153,8 +169,9 @@ public class InfoActivity extends YouTubeBaseActivity implements YouTubePlayer.O
             }
         });
 
-        // Initializing video player with developer key
-        youTubeView.initialize("AIzaSyAhq1fQGZDJ1B9w3MjaRZiS6aWVebzKDSs", this);
+
+
+
 
     }
 

@@ -2,8 +2,10 @@ package tw.com.defood.beacon;
 
 import android.app.Application;
 import android.content.Intent;
+import android.util.Log;
 
 import com.parse.Parse;
+import com.parse.ParseCrashReporting;
 import com.parse.ParseObject;
 
 import org.altbeacon.beacon.BeaconManager;
@@ -27,7 +29,11 @@ public class Myapp extends Application implements BootstrapNotifier {
     @Override
     public void onCreate() {
         super.onCreate();
+        ParseObject.registerSubclass(BeaconMap.class);
+        ParseObject.registerSubclass(BeaconPosition.class);
         ParseObject.registerSubclass(BeaconInfo.class);
+
+        ParseCrashReporting.enable(this);
         Parse.enableLocalDatastore(this);
         Parse.initialize(this, APPLICATION_ID, CLIENT_KEY);
 
@@ -41,13 +47,28 @@ public class Myapp extends Application implements BootstrapNotifier {
 
         backgroundPowerSaver = new BackgroundPowerSaver(this);
 
+        // set the duration of the scan to be 10 seconds
+        beaconManager.setBackgroundScanPeriod(10000l);
+        // set the time between each scan to be 60 seconds
+        beaconManager.setBackgroundBetweenScanPeriod(60000l);
+
+//        beaconManager.setForegroundScanPeriod(1000l);
+//        beaconManager.setForegroundBetweenScanPeriod(10000l);
     }
 
 
     @DebugLog
     @Override
     public void didEnterRegion(Region region) {
-        Helper.sendNotification(this, "觀迎來到滷味博物館，已將Beacon功能開啟。", new Intent(this, MainActivity.class), 1);
+
+//        if (!haveDetectedBeaconsSinceBoot) {
+//            Intent intent = new Intent(this, SplashActivity.class);
+//            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            this.startActivity(intent);
+//            haveDetectedBeaconsSinceBoot = true;
+//            Helper.sendNotification(this, "觀迎來到滷味博物館，已將Beacon功能開啟。", new Intent(this, MapActivity.class), 1);
+//        }
+
     }
 
     @DebugLog

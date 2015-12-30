@@ -6,62 +6,11 @@ import com.parse.ParseQuery;
 
 import org.altbeacon.beacon.Beacon;
 
-@ParseClassName("Beacon")
+@ParseClassName("BeaconInfo")
 public class BeaconInfo extends ParseObject {
-    private boolean mIsYoutubeOpen = true;
-    private boolean mIsWebsiteOpen = true;
-
-
-    private static ParseQuery<BeaconInfo> query;
 
     public static ParseQuery<BeaconInfo> getQuery() {
         return ParseQuery.getQuery(BeaconInfo.class);
-    }
-
-    public String getName() {
-        String value = getString("name");
-        return value;
-    }
-
-    public void setName(String value) {
-        put("name", value);
-    }
-
-    public String getUuid() {
-        String value = getString("uuid");
-        return value;
-    }
-
-    public void setUuid(String value) {
-        put("uuid", value);
-    }
-
-
-    public String getMajor() {
-        String value = getString("major");
-        return value;
-    }
-
-    public void setMajor(String value) {
-        put("major", value);
-    }
-
-    public String getMinor() {
-        String value = getString("minor");
-        return value;
-    }
-
-    public void setMinor(String value) {
-        put("minor", value);
-    }
-
-    public String getTitle() {
-        String value = getString("title");
-        return value;
-    }
-
-    public void setTitle(String value) {
-        put("title", value);
     }
 
     public String getType() {
@@ -73,6 +22,33 @@ public class BeaconInfo extends ParseObject {
         put("type", value);
     }
 
+    public String getImagePath() {
+        String value = getString("imagePath");
+        return value;
+    }
+
+    public void setImagePath(String value) {
+        put("imagePath", value);
+    }
+
+    public String getTitle() {
+        String value = getString("title");
+        return value;
+    }
+
+    public void setTitle(String value) {
+        put("title", value);
+    }
+
+    public String getContent() {
+        String value = getString("content");
+        return value;
+    }
+
+    public void setContent(String value) {
+        put("content", value);
+    }
+
     public String getUrl() {
         String value = getString("url");
         return value;
@@ -82,21 +58,11 @@ public class BeaconInfo extends ParseObject {
         put("url", value);
     }
 
-    public boolean getIsYoutubeOpen() {
-        return mIsYoutubeOpen;
-    }
 
-    public void setIsYoutubeOpen(boolean value) {
-        mIsYoutubeOpen = value;
-    }
-
-    public boolean getIsWebsiteOpen() {
-        return mIsWebsiteOpen;
-    }
-
-    public void setIsWebsiteOpen(boolean value) {
-        mIsWebsiteOpen = value;
-    }
-
-
+//    @Override
+//    public String toString() {
+//        return "\n" + super.toString() +
+//                "\nname: " + getName() +
+//                "\nisSendNotification: " + getIsSendNotificatioin();
+//    }
 }

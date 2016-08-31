@@ -106,16 +106,31 @@ public class InfoActivity extends YouTubeBaseActivity implements YouTubePlayer.O
         mMap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+                Integer position = (Integer) v.getTag();
+
+                Helper.mMapPosition = position;
+
+                Intent intent = new Intent();
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.setClass(InfoActivity.this, MapActivity.class);
+                startActivity(intent);
+
+                //finish();
             }
         });
         switch (Helper.mMapPosition) {
-            case 0:
+            case 0: {
                 mMap.setImageResource(R.drawable.btn_1f);
+                Integer position = 0;
+                mMap.setTag(position);
                 break;
-            case 1:
+            }
+            case 1: {
                 mMap.setImageResource(R.drawable.btn_2f);
+                Integer position = 1;
+                mMap.setTag(position);
                 break;
+            }
         }
 
         if (mVideo.getImagePath() == null) {

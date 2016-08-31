@@ -80,7 +80,7 @@ public class MapActivity extends AppCompatActivity implements BeaconConsumer {
             ParseObject.unpinAll(maps);
             ParseObject.pinAll(maps);
         } catch (ParseException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
 
         ParseQuery<BeaconPosition> queryPosition = BeaconPosition.getQuery();
@@ -89,7 +89,7 @@ public class MapActivity extends AppCompatActivity implements BeaconConsumer {
             ParseObject.unpinAll(positions);
             ParseObject.pinAll(positions);
         } catch (ParseException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
 
         ParseQuery<BeaconInfo> queryInfo = BeaconInfo.getQuery();
@@ -98,7 +98,7 @@ public class MapActivity extends AppCompatActivity implements BeaconConsumer {
             ParseObject.unpinAll(infos);
             ParseObject.pinAll(infos);
         } catch (ParseException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
 
         mPager = (ViewPager) findViewById(R.id.pager);
@@ -233,7 +233,7 @@ public class MapActivity extends AppCompatActivity implements BeaconConsumer {
                                         try {
                                             beaconInfo.pin();
                                         } catch (ParseException e) {
-                                            e.printStackTrace();
+                                            //e.printStackTrace();
                                         }
 
                                     }
@@ -322,7 +322,7 @@ public class MapActivity extends AppCompatActivity implements BeaconConsumer {
             try {
                  mBeaconMaps = queryMap.find();
             } catch (ParseException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             }
 
             //initBeaconPosition();
@@ -446,7 +446,7 @@ public class MapActivity extends AppCompatActivity implements BeaconConsumer {
                 List<BeaconPosition> beaconPositions = queryPosition.find();
                 putBeaconOnMap(beaconPositions, map);
             } catch (ParseException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             }
 
 
